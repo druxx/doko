@@ -45,8 +45,8 @@ class NavigationBar extends Component {
   activeRoute = (routeName) => {
     return this.props.location.pathname === routeName ? true : false;
   }
-  render() {    
 
+  render() {
     const { classes } = this.props;
 
     return (

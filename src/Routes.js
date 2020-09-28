@@ -1,6 +1,6 @@
 import Home from './components/Home';
 import SessionsTable from './components/SessionsTable'
-import Players from './components/Players'
+import StyledPlayers from './components/Players'
 import GamesTable from './components/GamesTable'
 
   const Routes = [
@@ -17,7 +17,7 @@ import GamesTable from './components/GamesTable'
     {
       path: '/players',
       sidebarName: 'Spieler',
-      component: Players
+      component: StyledPlayers
     },
     {
         path: '/games',
