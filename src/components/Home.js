@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { Container, Grid, Card, CardHeader, CardContent, TextField, Button, IconButton } from '@material-ui/core';
-import SaveIcon from '@material-ui/icons/Save'
+import { withRouter } from 'react-router-dom';
+import { Container, Grid, Paper, IconButton } from '@material-ui/core';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import { withStyles } from '@material-ui/core/styles';
+import PlayerFragment from './PlayerFragment';
 
 
 const styles = theme => ({
@@ -32,7 +33,12 @@ const mapStateToProps = state => {
     return {players};
 }
 
-class Players extends Component {
+class Home extends Component {
+
+    handleAddGameResult = () => {
+        this.props.history.push('/score');
+    }
+
 
     render() {
         const { classes, players } = this.props;
@@ -42,18 +48,21 @@ class Players extends Component {
             <div className={classes.content}>
               <Container maxWidth="xl" className={classes.container}>
                 <Grid container spacing={10} direction="column" justify="space-evenly" alignItems="center">
-                    <Grid container item xs={12} spacing={1} justify="space-evenly" alignItems="center">
+                    <Grid container item xs={12} spacing={1} justify="space-evenly" alignItems='stretch'>
                         {players.map((player,index) => {
                             return (
                                 <Grid item xs={2}>
-                                    <Card>
-                                        <CardHeader title={player.name}/>
-                                        <CardContent>
-                                        </CardContent>
-                                    </Card>
+                                    <Paper>
+                                        <PlayerFragment player={player} />
+                                    </Paper>
                                 </Grid>
                             );
                         })}
+                        <Grid item xs={1}>
+                            <IconButton aria-label="add" onClick={this.handleAddGameResult}>
+                                <AddCircleOutlineOutlinedIcon />
+                            </IconButton>
+                        </Grid>
                     </Grid>
                     <Grid container item xs={12} spacing={1} justify="space-evenly" alignItems="center">
                         <Grid item xs={2}>
@@ -66,5 +75,5 @@ class Players extends Component {
     }
 }
 
-const StyledPlayers = withStyles(styles, { withTheme: true })(Players)
-export default connect(mapStateToProps)(StyledPlayers);
+const StyledHome = withStyles(styles, { withTheme: true })(withRouter(Home))
+export default connect(mapStateToProps)(StyledHome);
