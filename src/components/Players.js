@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
+import { withRouter } from 'react-router-dom';
 import { Container, Grid, Card, CardHeader, CardContent, TextField, Button, IconButton } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save'
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
@@ -41,6 +42,7 @@ class Players extends Component {
     handleSave = () => {
         const names = this.textfields.map(textfield => textfield.value);
         this.props.setPlayerNames(names);
+        this.props.history.push('/');
     }
 
     render() {
@@ -90,5 +92,5 @@ class Players extends Component {
     }
 }
 
-const StyledPlayers = withStyles(styles, { withTheme: true })(Players)
+const StyledPlayers = withStyles(styles, { withTheme: true })(withRouter(Players))
 export default connect(mapStateToProps, {setPlayerNames, incrementNumberOfPlayers})(StyledPlayers);
