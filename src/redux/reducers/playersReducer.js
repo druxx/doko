@@ -1,22 +1,29 @@
+import { cloneDeep } from 'lodash';
+
+
 const initialState = {
-    players: Array(4).fill({name:'', points:0, soli:0, rank:0, pos:0})
-  };
+    players: Array.from({length: 4}, (_, id) => ({name:'', points:0, soli:0, rank:0, pos:id}))
+};
   
-  export default function(state = initialState, action) {
+export default function(state = initialState, action) {
     switch (action.type) {
       case 'SET_PLAYER_NAMES': {
         const playerNames = action.payload;
-        let players = state.players;
-        if (playerNames.length > state.players.length) {
-            players = [];
-            playerNames.forEach(player => {
-                players.push({name: player});                
-            });
-        } else {
-            players.forEach( (player,index) => {
-                player.name = playerNames[index];
-            });
-        }
+        let players = cloneDeep(state.players);
+        players.forEach( (player,i) => {
+          player.name = playerNames[i];
+        });
+
+        return {
+          ...state,
+          players: players
+        };
+      }        
+
+      case 'INC_PLAYERS': {
+        const playerNames = action.payload;
+        let players = [...state.players];
+        players.push({name:'', points:0, soli:0, rank:0, pos:players.length});
 
         return {
           ...state,
