@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash';
 
 
 const initialState = {
-    players: Array.from({length: 4}, (_, id) => ({name:'', points:0, soli:0, rank:0, pos:id}))
+    players: Array.from({length: 4}, (_, id) => ({name:'x', points:42, soli:id > 1 ? 1 : 0, rank:4 - id, pos:(id  + 1) % 4}))
 };
   
 export default function(state = initialState, action) {
@@ -21,7 +21,6 @@ export default function(state = initialState, action) {
       }        
 
       case 'INC_PLAYERS': {
-        const playerNames = action.payload;
         let players = [...state.players];
         players.push({name:'', points:0, soli:0, rank:0, pos:players.length});
 
