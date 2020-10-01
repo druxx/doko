@@ -21,12 +21,12 @@ export default function PlayerFragment(props) {
   const top = '' + player.rank +'.   ' + player.name;
   let bottom = 'GeberAufspiel';
   let hidden = true;
-  if (player.pos === 0) {
-    bottom = 'Geber';
+  if (player.lead) {
+    bottom = 'Aufspiel';
     hidden = false;
   }
-  if (player.pos === 1) {
-    bottom = 'Aufspiel'; 
+  if (player.dealer) {
+    bottom = 'Geber'; 
     hidden = false;
   } 
   return (

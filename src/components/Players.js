@@ -29,7 +29,7 @@ const styles = theme => ({
 
 
 const mapStateToProps = state => {
-    const { players } = state || {};
+    const { players } = state.players || {};
     return {players};
 }
 

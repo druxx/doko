@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { withRouter } from 'react-router-dom';
-import { Container, Grid, Paper, IconButton } from '@material-ui/core';
+import { Container, Grid, Paper, IconButton, Box } from '@material-ui/core';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import { withStyles } from '@material-ui/core/styles';
+import { cloneDeep } from 'lodash';
 import PlayerFragment from './PlayerFragment';
 
 
@@ -29,8 +30,14 @@ const styles = theme => ({
 
 
 const mapStateToProps = state => {
-    const { players } = state || {};
-    return {players};
+    const { players } = state.players || {};
+    const { games } = state.games || [];
+    const game = {lead: state.games.lead};
+    game.dealer = game.lead - 1;
+    let points = null;
+    if (games.length > 0)
+        points = games[games.length - 1].points;
+    return {players, game, points};
 }
 
 class Home extends Component {
@@ -41,8 +48,25 @@ class Home extends Component {
 
 
     render() {
-        const { classes, players } = this.props;
-        this.players = players;
+        const { game, points = Array(this.props.players.length).fill(0), classes } = this.props;
+        const players = cloneDeep(this.props.players);
+        players[game.lead].lead = true;
+        const dealer = game.dealer >= 0 ? game.dealer : players.length - 1;
+        players[dealer].dealer = true;
+        if (points) {
+            const sorted = [...points]
+            sorted.sort((a, b) => b - a); 
+            players.forEach( (player,index) => {
+                player.points = points[index];
+                player.rank = sorted.findIndex( (element) => element === player.points ) + 1;
+            });
+        }
+        else {
+            players.forEach( (player) => {
+                player.points = 0;
+                player.rank = 1;
+            });
+        }
 
         return (
             <div className={classes.content}>
@@ -53,7 +77,9 @@ class Home extends Component {
                             return (
                                 <Grid item xs={2}>
                                     <Paper>
-                                        <PlayerFragment player={player} />
+                                      <Box m={1}>
+                                        <PlayerFragment player={player} ml={2}/>
+                                      </Box>
                                     </Paper>
                                 </Grid>
                             );

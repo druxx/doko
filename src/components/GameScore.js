@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import { connect } from "react-redux";
-import { Container, Grid, Paper, Typography, Checkbox, TextField } from '@material-ui/core';
+import { Container, Grid, Paper, Typography, Checkbox, TextField, Box, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import SaveIcon from '@material-ui/icons/Save'
 import CheckboxTable from './CheckboxTable';
+import { addGameResult } from "../redux/actions";
 
 
 const styles = theme => ({
@@ -33,8 +36,9 @@ const styles = theme => ({
 
 
 const mapStateToProps = state => {
-    const { players } = state || {};
-    return {players};
+    const { players } = state.players || {};
+    const game = {dealer: state.games.lead - 1};
+    return {players, game};
 }
 
 class GameScore extends Component {
@@ -43,10 +47,16 @@ class GameScore extends Component {
         super(props);
         this.pointsList = ['keine 120', 'keine 90', 'keine 60', 'keine 30', 'schwarz'];
         this.announcedList = ['re', 'kontra', 'keine 120', 'keine 90', 'keine 60', 'keine 30', 'schwarz'];
+        this.foxes = ['gefangen', 'gefangen', 'verloren', 'verloren'];
+        this.charlies = ['erfolgreich', 'gefangen', 'gefangen', 'verloren', 'verloren'];
         const state = {
             contra: false,
             points: Array(this.pointsList.length).fill(false),
             announced: Array(this.announcedList.length).fill(false),
+            foxes: Array(4).fill(false),
+            hideFoxes: [false,true,false,true],
+            charlies: Array(this.charlies.length).fill(false),
+            hideCharlies: [false,false,true,false,true],
             result: 1
         };
         state.points[0] = true;
@@ -54,18 +64,23 @@ class GameScore extends Component {
     }
 
     componentDidMount() {
-        this.setState( {selectedPlayers: Array(this.props.players.length).fill(false)});
+        this.setState( {winningPlayers: Array(this.props.players.length).fill(false)});
+    }
+
+    handleSave = () => { 
+        this.props.addGameResult(this.state);
+        this.props.history.push('/');
     }
 
     onPlayersClick = (event, index) => {
-        let newSelected = [...this.state.selectedPlayers];
-        newSelected[index] = !this.state.selectedPlayers[index];
-        this.setState({selectedPlayers: newSelected});
+        let newSelected = [...this.state.winningPlayers];
+        newSelected[index] = !this.state.winningPlayers[index];
+        this.setState({winningPlayers: newSelected});
     };
 
     onPointsClick = (event, index) => {
-        let firstFalse = this.state.points.findIndex(element => element == false);
-        if (firstFalse == -1)
+        let firstFalse = this.state.points.findIndex(element => element === false);
+        if (firstFalse === -1)
             firstFalse = this.state.points.length;
         const oldMax = firstFalse - 1;
         let newSelected = [...this.state.points];
@@ -81,8 +96,27 @@ class GameScore extends Component {
             for (let i = index; i < newSelected.length; i++)
                 newSelected[i] = false;
         }
-        this.setState({points: newSelected});
-        this.setState({result: this.state.result + newMax - oldMax});
+        this.setState( {points: newSelected, 
+                        result: this.state.result + newMax - oldMax
+        });
+    };
+
+    onAnnouncedClick = (event, index) => {
+        let firstFalse = this.state.announced.findIndex(element => element === false);
+        if (firstFalse === -1)
+            firstFalse = this.state.announced.length;
+        let newSelected = [...this.state.announced];
+        const selected = !this.state.announced[index];
+        if ( selected ) {
+            for (let i = 2; i <= index; i++)
+                newSelected[i] = true;
+            newSelected[index] = true;
+        }
+        else {
+            for (let i = index; i < newSelected.length; i++)
+                newSelected[i] = false;
+        }
+        this.setState( {announced: newSelected} );
     };
 
     onContraClicked = (event) => {
@@ -94,10 +128,82 @@ class GameScore extends Component {
             this.setState({result: this.state.result - 1});
     }
 
+    onFoxClicked = (event, index) => {
+        let newSelected = [...this.state.foxes];
+        let newHidden = [...this.state.hideFoxes];
+        const selected = !this.state.foxes[index];
+        newSelected[index] = selected;
+        const newState = {foxes:newSelected};
+        if (index < 2) { // caught
+            if (selected) {
+                newState.result = this.state.result + 1;
+                if (index === 0) {
+                    newHidden[1] = false; 
+                    newState.hideFoxes = newHidden;
+                }
+            }
+            else
+                newState.result = this.state.result - 1;
+        }
+        else {
+            if (selected) {
+                newState.result = this.state.result - 1;
+                if (index === 2) {
+                    newHidden[3] = false; 
+                    newState.hideFoxes = newHidden;
+                }
+            }
+            else
+                newState.result = this.state.result + 1;           
+        };
+        this.setState(newState);
+    }
+
+    onCharlyClicked = (event, index) => {
+        let newSelected = [...this.state.charlies];
+        let newHidden = [...this.state.hideCharlies];
+        const selected = !this.state.charlies[index];
+        newSelected[index] = selected;
+        const newState = {charlies:newSelected};
+        if (index === 0) { // caught
+            if (selected) {
+                newState.result = this.state.result + 1;
+            }
+            else
+                newState.result = this.state.result - 1;
+        }
+        else if (index < 3) {
+            if (selected) {
+                newState.result = this.state.result + 1;
+                if (index === 1) {
+                    newHidden[2] = false; 
+                }
+            }
+            else
+                newState.result = this.state.result - 1;           
+        }
+        else {
+            if (selected) {
+                newState.result = this.state.result - 1;
+                if (index === 3) {
+                    newHidden[4] = false; 
+                }
+            }
+            else
+                newState.result = this.state.result + 1;           
+        };
+        newState.hideCharlies = newHidden;
+        this.setState(newState);
+    }
+
     render() {
-        const { classes, players } = this.props;
+        const { classes, players, game } = this.props;
         const playerNames = players.map(player => player.name);
-        
+        const nonPlayers = Array(playerNames.length).fill(false);
+        if (playerNames.length > 4) {
+            const dealer = game.dealer >= 0 ? game.dealer : playerNames.length - 1;
+            nonPlayers[dealer] = true;
+        }
 
         return (
             <div className={classes.content}>
@@ -105,7 +211,7 @@ class GameScore extends Component {
                 <Grid container spacing={10} direction="column" justify="space-evenly" alignItems="center">
                     <Grid container item xs={12} spacing={1} justify="space-evenly" alignItems='stretch'>
                         <Grid item xs={2}>
-                            <CheckboxTable title={'gewonnen:'} items={playerNames} selected={this.state.selectedPlayers} onClick={this.onPlayersClick}/>
+                            <CheckboxTable title={'gewonnen:'} items={playerNames} selected={this.state.winningPlayers} onClick={this.onPlayersClick} hideItems={nonPlayers}/>
                         </Grid>
                         <Grid item xs={2}>
                             <Paper>
@@ -116,12 +222,18 @@ class GameScore extends Component {
                                     <Checkbox checked={this.state.contra} onClick={this.onContraClicked}/>
                                 </Typography>
                             </Paper>
+                            <Box mt={2}>
+                                <CheckboxTable title={'Fuchs'} items={this.foxes} selected={this.state.foxes} onClick={this.onFoxClicked} hideTable={true} hideItems={this.state.hideFoxes}/>
+                            </Box>
+                            <Box mt={2}>
+                                <CheckboxTable title={'Karlchen'} items={this.charlies} selected={this.state.charlies} onClick={this.onCharlyClicked} hideTable={true} hideItems={this.state.hideCharlies}/>
+                            </Box>
                         </Grid>
                         <Grid item xs={2}>
                             <CheckboxTable title={'Punkte'} items={this.pointsList} selected={this.state.points} onClick={this.onPointsClick}/>
                         </Grid>
                         <Grid item xs={2}>
-                            <CheckboxTable title={'Ansage'} items={this.announcedList} hideTable={true}/>
+                            <CheckboxTable title={'Ansage'} items={this.announcedList} hideTable={true} selected={this.state.announced} onClick={this.onAnnouncedClick}/>
                         </Grid>
                         <Grid item xs={2}>
                             <Paper>
@@ -138,10 +250,11 @@ class GameScore extends Component {
                                 />
                                 </Typography>
                             </Paper>
-                        </Grid>
-                    </Grid>
-                    <Grid container item xs={12} spacing={1} justify="space-evenly" alignItems="center">
-                        <Grid item xs={2}>
+                            <Box mt={10} align='center'>
+                                <Button onClick={this.handleSave} variant="contained" size="large" className={classes.button} startIcon={<SaveIcon />}>
+                                    Speichern
+                                </Button>
+                            </Box>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -151,5 +264,5 @@ class GameScore extends Component {
     }
 }
 
-const StyledGameScore = withStyles(styles, { withTheme: true })(GameScore)
-export default connect(mapStateToProps)(StyledGameScore);
+const StyledGameScore = withStyles(styles, { withTheme: true })(withRouter(GameScore))
+export default connect(mapStateToProps,{addGameResult})(StyledGameScore);
