@@ -1,7 +1,7 @@
 import React from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
-import Routes from './Routes'
-import NavigationBar from './NavigationBar';
+import Routes from './routes/Routes'
+import NavigationBar from './components/NavigationBar';
 
 function App() {
   

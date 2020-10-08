@@ -31,7 +31,7 @@ export default function PlayerFragment(props) {
   } 
   return (
     <React.Fragment>
-        <Typography component="h2" variant="h6" color="primary" gutterBottom>
+        <Typography component="h2" variant="h5" color="primary" gutterBottom>
           {top}
         </Typography>
         <Typography component="p" variant="h4">

@@ -30,7 +30,11 @@ const styles = theme => ({
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
         marginBottom: theme.spacing(2),
-        width: '5ch'
+        width: '8ch'
+    },
+    boxLarger: {
+        paddingLeft: theme.spacing(10),
+        paddingRight: theme.spacing(1)
     }
 })
 
@@ -71,6 +75,10 @@ class GameScore extends Component {
         this.props.addGameResult(this.state);
         this.props.history.push('/');
     }
+
+    onChangePoints = (event) => {
+        this.setState({result: Number(event.target.value)});
+    };
 
     onPlayersClick = (event, index) => {
         let newSelected = [...this.state.winningPlayers];
@@ -246,7 +254,7 @@ class GameScore extends Component {
                                     inputProps={{style: {fontSize: '250%'}}}
                                     label=''
                                     value={this.state.result}
-                                    inputRef={(c) => {this.resultInput = c}}
+                                    onChange={this.onChangePoints}
                                 />
                                 </Typography>
                             </Paper>

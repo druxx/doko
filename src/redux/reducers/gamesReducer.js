@@ -1,4 +1,5 @@
 import { cloneDeep } from 'lodash';
+import moment from 'moment';
 
 const initialState = {
   games: [],
@@ -13,28 +14,30 @@ export default function(state = initialState, action) {
         const players = game.winningPlayers.length;
         const dealer = state.lead - 1 >= 0 ? state.lead - 1 : players - 1;
         const winners = game.winningPlayers.reduce((accumulator, item) => accumulator + item);
-        const points =  game.winningPlayers.map( (winner,index) => {
+        const playersPoints =  game.winningPlayers.map( (winner,index) => {
           let lastRow = null;
           if (games.length !== 0)
             lastRow = games[games.length - 1];
           else
-            lastRow = {points: Array(players).fill(0)};
+            lastRow = {playersPoints: Array(players).fill(0)};
           if (winner) {
             if (winners > 1)
-              return lastRow.points[index] + game.result;
+              return lastRow.playersPoints[index] + game.result;
             else
-              return lastRow.points[index] + 3 * game.result;
+              return lastRow.playersPoints[index] + 3 * game.result;
           } 
           else {
-            if (players > 4 && index === dealer) 
-              return lastRow.points[index];
-            else if (winners < 3)
-              return lastRow.points[index] - game.result;
-            else
-              return lastRow.points[index] - 3 * game.result;
+            if (players > 4 && index === dealer) {
+              return lastRow.playersPoints[index];
+            } else if (winners < 3) {
+              return lastRow.playersPoints[index] - game.result;
+            } else {
+              return lastRow.playersPoints[index] - 3 * game.result;
+            }
           } 
         });
-        game.points = points;
+        game.playersPoints = playersPoints;
+        game.time = moment().format('HH:mm:ss');
         games.push(game);
         return {
           ...state,

@@ -36,7 +36,7 @@ const mapStateToProps = state => {
     game.dealer = game.lead - 1;
     let points = null;
     if (games.length > 0)
-        points = games[games.length - 1].points;
+        points = games[games.length - 1].playersPoints;
     return {players, game, points};
 }
 

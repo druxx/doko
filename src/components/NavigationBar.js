@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { NavLink, withRouter } from 'react-router-dom';
-import Routes from './Routes';
+import Routes from '../routes/Routes';
 
 const styles = theme => ({
     root: {
@@ -72,13 +72,16 @@ class NavigationBar extends Component {
           <Divider />
           <MenuList>
             {Routes.map((prop, key) => {
-              return (
-                <NavLink to={prop.path} style={{ textDecoration: 'none' }} key={key}>
-                  <MenuItem selected={this.activeRoute(prop.path)}>
-                    <ListItemText primary={prop.sidebarName} />
-                  </MenuItem>
-                </NavLink>
-              );
+              if (prop.hidden)
+                return null;
+              else
+                return (
+                  <NavLink to={prop.path} style={{ textDecoration: 'none' }} key={key}>
+                    <MenuItem selected={this.activeRoute(prop.path)}>
+                      <ListItemText primary={prop.sidebarName} />
+                    </MenuItem>
+                  </NavLink>
+                );
             })}
           </MenuList>
         </Drawer>
